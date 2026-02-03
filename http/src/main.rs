@@ -1,20 +1,36 @@
-use poem::{EndpointExt, Route, Server, get, handler, listener::TcpListener, middleware::Tracing, web::Path};
+use poem::{
+ Route, Server, post, get, handler, listener::TcpListener, web::Json
+};
+pub mod req_input;
+pub mod req_output;
+use crate::{
+    req_input::CreateWebsiteInput,
+    req_output::CreateWebsiteOutput
+};
 
 
 #[handler]
-fn get_website(Path(website_id):Path<String>) -> String{
+fn get_website(website_id:String)-> String{
     format!("website:{}",website_id)
 }
 
-// fn create_website() -> String {
+#[handler]
+fn create_website(
+    Json(data): Json<CreateWebsiteInput>,
+) -> Json<CreateWebsiteOutput> {
+    let response = CreateWebsiteOutput {
+        id: data.url
+    };
 
-// }
+    Json(response)
+}
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let app = Route::new()
-        .at("/website/", get(get_website)).with
-        (Tracing);
+        .at("/website/:website_id", get(get_website))
+        .at("/website", post(create_website));
+        // .with(Tracing);
     Server::new(TcpListener::bind("0.0.0.0:3003"))
       .name("web")
       .run(app)
