@@ -6,14 +6,14 @@ fn get_website(Path(website_id):Path<String>) -> String{
     format!("website:{}",website_id)
 }
 
-fn create_website() -> String {
-    
-}
+// fn create_website() -> String {
+
+// }
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let app = Route::new()
-        .at("/website/", get(website)).with
+        .at("/website/", get(get_website)).with
         (Tracing);
     Server::new(TcpListener::bind("0.0.0.0:3003"))
       .name("web")
