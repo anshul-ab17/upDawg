@@ -2,8 +2,12 @@ use poem::{EndpointExt, Route, Server, get, handler, listener::TcpListener, midd
 
 
 #[handler]
-fn website(Path(website_id):Path<String>) -> String{
+fn get_website(Path(website_id):Path<String>) -> String{
     format!("website:{}",website_id)
+}
+
+fn create_website() -> String {
+    
 }
 
 #[tokio::main]
