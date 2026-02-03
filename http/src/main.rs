@@ -7,10 +7,13 @@ use crate::{
     req_input::CreateWebsiteInput,
     req_output::CreateWebsiteOutput
 };
+use db::Store;
 
 
 #[handler]
 fn get_website(website_id:String)-> String{
+    let db= Store{};
+    db.create_user();
     format!("website:{}",website_id)
 }
 
