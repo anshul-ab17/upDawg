@@ -1,0 +1,29 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Rust
+/target
+Cargo.lock
+
+# Diesel
+diesel.toml.bak
+
+# Postgres (no local DB files, but ignore dumps)
+*.sql.dump
+*.dump
+*.backup
+
+# Logs / temp
+*.log
+*.tmp
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
