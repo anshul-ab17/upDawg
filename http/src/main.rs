@@ -11,18 +11,20 @@ use db::Store;
 
 
 #[handler]
-fn get_website(website_id:String)-> String{
+async fn get_website(website_id:String)-> String{
     let db= Store{};
-    db.create_user();
+    db.create_user().await;
     format!("website:{}",website_id)
 }
 
 #[handler]
-fn create_website(
-    Json(data): Json<CreateWebsiteInput>,
+async fn create_website(
+    Json(_data): Json<CreateWebsiteInput>,
 ) -> Json<CreateWebsiteOutput> {
+    let db= Store{};
+    let id =db.create_website().await;
     let response = CreateWebsiteOutput {
-        id: data.url
+        id
     };
 
     Json(response)

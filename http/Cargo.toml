@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-poem =  {version="3.1.12"}
-serde = {version ="1.0.228", features=["derive"]}
-tokio = {version= "1.49.0", features=["full"]}
-db =    {path="../db"}
+poem   = {version="3.1.12"}
+serde  = {version ="1.0.228", features=["derive"]}
+db     = {path="../db"}
+diesel = { version = "2.3.6", features = ["postgres"] }
+tokio = { version = "1.49.0", features = ["full"] }
