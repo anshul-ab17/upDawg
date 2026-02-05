@@ -16,11 +16,16 @@ async fn get_website(Path(name) : Path<String>) -> String {
 }
 
 #[handler]
-async fn sign_in
+async fn sign_in(
+    Json(data): Json<CreateWebsiteInput> 
+) -> Json<CreateWebsiteOutput> {
+    let mut db = Store::default().unwrap();
+    let user = db.sign_up(data.username , data.password).unwrap();
+}
 
 #[handler]
 async fn create_website(
-    Json(data): Json<CreateWebsiteInput>,
+    Json(data): Json<CreateWebsiteInput>
 ) -> Json<CreateWebsiteOutput> {
     let mut db= Store::default().unwrap();
     let website = db.create_website(String::from

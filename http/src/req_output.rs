@@ -5,3 +5,7 @@ use serde::{Serialize, Deserialize};
 pub struct CreateWebsiteOutput{
     pub id:String
 }
+
+pub struct CreateUserOutput {
+    pub id : String
+}
