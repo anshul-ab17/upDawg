@@ -1,5 +1,5 @@
 use poem::{
- Route, Server, get, handler, listener::TcpListener, post, web::{Json, Path}
+ Route, Server, get, handler, listener::TcpListener, post, web::{Json}
 };
 
 use db::{store::Store};
@@ -15,7 +15,7 @@ use crate::{
 async fn sign_up(
     Json(data): Json<CreateUserInput>,
 ) -> Json<CreateUserOutput> {
-    let mut db = Store::default().unwrap();
+    let mut db = Store::new().unwrap();
 
     let user_id = db
         .sign_up(data.username, data.password)
@@ -31,9 +31,9 @@ async fn sign_up(
 async fn sign_in(
     Json(data) : Json<CreateUserInput>, 
 ) -> Json<SignInOutput> {
-    let mut db = Store::default().unwrap();
+    let mut db = Store::new().unwrap();
 
-    let user_id =db.
+    let _user_id =db.
         sign_in(data.username, data.password)
         .unwrap();
 
@@ -48,7 +48,7 @@ async fn sign_in(
 async fn create_website(
     Json(data): Json<CreateWebsiteInput>
 ) -> Json<CreateWebsiteOutput> {
-    let mut db= Store::default().unwrap();
+    let mut db= Store::new().unwrap();
     let website = db.create_website(String::from
         ("803b50f8-330e-4c5c-b264-eca313136efb"), data.url).unwrap();
     let response = CreateWebsiteOutput {
@@ -62,7 +62,7 @@ async fn create_website(
 async fn get_website(
     Json(data) : Json<CreateWebsiteInput>,
 ) -> Json<GetWebsiteOutput> {
-    let mut db = Store::default().unwrap();
+    let mut db = Store::new().unwrap();
 
     let website =db.get_website(data.url).unwrap();
     Json(
