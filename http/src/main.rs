@@ -4,10 +4,8 @@ use poem::{
 pub mod req_input;
 pub mod req_output;
 use crate::{
-    req_input::CreateWebsiteInput,
-    req_output::CreateWebsiteOutput,
-    req_input::CreateUserInput,
-    req_output::CreateUserOutput
+    req_input::{CreateUserInput, CreateWebsiteInput},
+    req_output::{CreateUserOutput, CreateWebsiteOutput, SignInOutput}
 };
 
 use db::{store::Store};
@@ -18,7 +16,7 @@ async fn get_website(Path(name) : Path<String>) -> String {
 }
 
 #[handler]
-async fn sign_in(
+async fn sign_up(
     Json(data): Json<CreateUserInput>,
 ) -> Json<CreateUserOutput> {
     let mut db = Store::default().unwrap();
@@ -30,6 +28,22 @@ async fn sign_in(
     let response = CreateUserOutput {
         id: user_id,
     };
+    Json(response)
+}
+
+#[handler]
+async fn sign_in(Json(data) : Json<CreateUserInput>, 
+) -> Json<SignInOutput> {
+    let mut db = Store::default().unwrap();
+
+    let user_id =db.
+        sign_in(data.username, data.password)
+        .unwrap();
+
+    let response = SignInOutput {
+        jwt: String::from("ab")
+    };
+
     Json(response)
 }
 
@@ -49,8 +63,10 @@ async fn create_website(
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let app = Route::new()
-        .at("/website/:website_id", get(create_website))
-        .at("/website", post(create_website));
+        .at("/website/:website_id", get(get_website))
+        .at("/website", post(create_website))
+        .at("/user/signup", post(sign_up))
+        .at("/user/signin", post(sign_in));
         // .with(Tracing);
     Server::new(TcpListener::bind("0.0.0.0:3003"))
       .name("web")

@@ -9,3 +9,9 @@ pub struct CreateWebsiteOutput{
 pub struct CreateUserOutput {
     pub id : String
 }
+
+
+#[derive(Serialize, Deserialize)]
+pub struct SignInOutput {
+    pub jwt : String
+}
