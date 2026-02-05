@@ -16,13 +16,13 @@ impl Store {
     pub fn sign_up(&mut self , username:String, password:String) -> Result<String, diesel::result::Error>{
         use crate::schema::user;
         let id= Uuid::new_v4();
-        let u = User {
+        let user = User {
             id:id.to_string(),
             username,
             password
         };
         diesel::insert_into(user::table)
-            .values(&u)
+            .values(&user)
             .returning(User::as_returning())
             .get_result(&mut self.conn)?;
             
