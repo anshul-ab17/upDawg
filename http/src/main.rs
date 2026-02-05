@@ -5,7 +5,9 @@ pub mod req_input;
 pub mod req_output;
 use crate::{
     req_input::CreateWebsiteInput,
-    req_output::CreateWebsiteOutput
+    req_output::CreateWebsiteOutput,
+    req_input::CreateUserInput,
+    req_output::CreateUserOutput
 };
 
 use db::{store::Store};
@@ -17,10 +19,18 @@ async fn get_website(Path(name) : Path<String>) -> String {
 
 #[handler]
 async fn sign_in(
-    Json(data): Json<CreateWebsiteInput> 
-) -> Json<CreateWebsiteOutput> {
+    Json(data): Json<CreateUserInput>,
+) -> Json<CreateUserOutput> {
     let mut db = Store::default().unwrap();
-    let user = db.sign_up(data.username , data.password).unwrap();
+
+    let user_id = db
+        .sign_up(data.username, data.password)
+        .unwrap();
+
+    let response = CreateUserOutput {
+        id: user_id,
+    };
+    Json(response)
 }
 
 #[handler]
