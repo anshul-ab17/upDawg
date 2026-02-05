@@ -15,3 +15,8 @@ pub struct CreateUserOutput {
 pub struct SignInOutput {
     pub jwt : String
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct GetWebsiteOutput {
+    pub url : String
+}

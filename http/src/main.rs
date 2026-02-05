@@ -1,19 +1,15 @@
 use poem::{
  Route, Server, get, handler, listener::TcpListener, post, web::{Json, Path}
 };
+
+use db::{store::Store};
+
 pub mod req_input;
 pub mod req_output;
 use crate::{
     req_input::{CreateUserInput, CreateWebsiteInput},
-    req_output::{CreateUserOutput, CreateWebsiteOutput, SignInOutput}
+    req_output::{CreateUserOutput, CreateWebsiteOutput, GetWebsiteOutput, SignInOutput}
 };
-
-use db::{store::Store};
-
-#[handler]
-async fn get_website(Path(name) : Path<String>) -> String {
-    format!("hi :{name}")
-}
 
 #[handler]
 async fn sign_up(
@@ -32,7 +28,8 @@ async fn sign_up(
 }
 
 #[handler]
-async fn sign_in(Json(data) : Json<CreateUserInput>, 
+async fn sign_in(
+    Json(data) : Json<CreateUserInput>, 
 ) -> Json<SignInOutput> {
     let mut db = Store::default().unwrap();
 
@@ -54,10 +51,24 @@ async fn create_website(
     let mut db= Store::default().unwrap();
     let website = db.create_website(String::from
         ("803b50f8-330e-4c5c-b264-eca313136efb"), data.url).unwrap();
-        let response = CreateWebsiteOutput {
-            id:website.id
-        };
-       Json(response)
+    let response = CreateWebsiteOutput {
+        id:website.id
+    };
+    Json(response)
+}
+
+
+#[handler]
+async fn get_website(
+    Json(data) : Json<CreateWebsiteInput>,
+) -> Json<GetWebsiteOutput> {
+    let mut db = Store::default().unwrap();
+
+    let website =db.get_website(data.url).unwrap();
+    Json(
+        GetWebsiteOutput {
+        url : website.url
+    })
 }
 
 #[tokio::main]
