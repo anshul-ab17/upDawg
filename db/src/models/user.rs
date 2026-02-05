@@ -19,7 +19,7 @@ impl Store {
         let u = User {
             id:id.to_string(),
             username,
-            password,
+            password
         };
         diesel::insert_into(user::table)
             .values(&u)
@@ -28,7 +28,7 @@ impl Store {
             
         Ok(id.to_string())
     }
-
+    
     pub fn signin(&mut self, ip_username:String, ip_password:String)-> Result<bool , diesel::result::Error>{
         use crate::schema::user::dsl::*;
 
