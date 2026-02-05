@@ -1,7 +1,7 @@
+use std::{sync::{Arc, Mutex}};
 use poem::{
- Route, Server, get, handler, listener::TcpListener, post, web::{Json}
+ EndpointExt, Route, Server, get, handler, listener::TcpListener, middleware::AddDataEndpoint, post, web::{Data, Json, Path}
 };
-
 use db::{store::Store};
 
 pub mod req_input;
@@ -59,25 +59,27 @@ async fn create_website(
 
 
 #[handler]
-async fn get_website(
-    Json(data) : Json<CreateWebsiteInput>,
-) -> Json<GetWebsiteOutput> {
-    let mut db = Store::new().unwrap();
-
-    let website =db.get_website(data.url).unwrap();
+fn get_website(
+    Path(id) : Path<String>, Data(db): Data<&Arc<Mutex<Store>>>
+) -> Json<GetWebsiteOutput> { 
+    let mut locked_db = db.lock().unwrap();
+    let website =locked_db.get_website(id).unwrap();
     Json(
         GetWebsiteOutput {
         url : website.url
     })
 }
 
-#[tokio::main]
+
+#[tokio::main(flavor ="multi_thread")]
 async fn main() -> Result<(), std::io::Error> {
-    let app = Route::new()
+    let db = Arc::new(Mutex::new(Store::new().unwrap()));
+    let app:AddDataEndpoint<Route, Arc<_>> = Route::new()
         .at("/website/:website_id", get(get_website))
         .at("/website", post(create_website))
         .at("/user/signup", post(sign_up))
-        .at("/user/signin", post(sign_in));
+        .at("/user/signin", post(sign_in))
+        .data(db);
         // .with(Tracing);
     Server::new(TcpListener::bind("0.0.0.0:3003"))
       .name("web")
