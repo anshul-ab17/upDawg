@@ -1,5 +1,6 @@
 use diesel::prelude::*;
 use crate::config::Config;
+
 pub struct Store {
     pub conn: PgConnection
 }

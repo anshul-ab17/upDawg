@@ -7,27 +7,25 @@ use crate::{
     req_input::CreateWebsiteInput,
     req_output::CreateWebsiteOutput
 };
-use db::Store;
-
-
-#[handler]
-async fn get_website(website_id:String)-> String{
-    let db= Store{};
-    db.create_user().await;
-    format!("website:{}",website_id)
-}
+use db::store::{Store};
 
 #[handler]
 async fn create_website(
     Json(_data): Json<CreateWebsiteInput>,
 ) -> Json<CreateWebsiteOutput> {
-    let db= Store{};
+    let db= Store::default();
     let id =db.create_website().await;
     let response = CreateWebsiteOutput {
         id
     };
-
     Json(response)
+}
+
+#[handler]
+async fn get_website(website_id:String)-> String{
+    let db= Store::default();
+    let id = db.create_website();
+    format!("website:{}",website_id)
 }
 
 #[tokio::main]

@@ -5,6 +5,6 @@ impl Store {
         println!("create website called");
     }
     pub fn get_website(&self) -> String {
-        String::from("1");
+        String::from("1")
     }
 }

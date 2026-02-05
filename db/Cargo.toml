@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 diesel = "2.3.6"
 diesel_cli = { version = "2.3.6", default-features = false, features = ["postgres"] }
+uuid = { version="1.20.0", features= ["v4"]}
