@@ -1,5 +1,5 @@
 use poem::{
- Route, Server, get, handler, listener::TcpListener, post, web::Json
+ Route, Server, get, handler, listener::TcpListener, post, web::{Json, Path}
 };
 pub mod req_input;
 pub mod req_output;
@@ -9,6 +9,14 @@ use crate::{
 };
 
 use db::{store::Store};
+
+#[handler]
+async fn get_website(Path(name) : Path<String>) -> String {
+    format!("hi :{name}")
+}
+
+#[handler]
+async fn sign_in
 
 #[handler]
 async fn create_website(
