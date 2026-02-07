@@ -28,7 +28,8 @@ impl Store {
         Ok(id.to_string())
     }
     
-    pub fn sign_in(&mut self, ip_username:String, ip_password:String)-> Result<bool , diesel::result::Error>{
+    pub fn sign_in(&mut self, ip_username:String, ip_password:String)-> 
+    Result<String , diesel::result::Error>{
         use crate::schema::user::dsl::*;
 
         let user_result = user
@@ -37,8 +38,8 @@ impl Store {
             .first(&mut self.conn)?;
 
         if user_result.password != ip_password {
-            return Ok(false);
+            return Ok(user_result.id);
         }
-        Ok(true)
+        Err(diesel::result::Error::NotFound)
     }
 }
