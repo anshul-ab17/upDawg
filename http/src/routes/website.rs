@@ -8,7 +8,7 @@ use crate::req_output::{CreateWebsiteOutput, GetWebsiteOutput};
 pub fn create_website(
     Json(data): Json<CreateWebsiteInput> , 
     Data(db): Data<&Arc<Mutex<Store>>> ,
-    UserId(user_id) :UserId
+    UserId(_user_id) :UserId
 ) -> Json<CreateWebsiteOutput> {
     let mut locked_db = db.lock().unwrap(); 
     let website = locked_db.create_website(String::from
@@ -29,6 +29,7 @@ pub fn get_website(
     let website =locked_db.get_website(id,user_id).unwrap();
     Json(
         GetWebsiteOutput {
-        url : website.url
+        url : website.url,
+        id: website.id
     })
 }
