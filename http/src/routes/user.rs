@@ -1,4 +1,5 @@
-use std::{sync::{Arc, Mutex}}; 
+use std::{sync::{Arc, Mutex}};
+use jsonwebtoken::{EncodingKey, Header, encode};
 use poem::{
   Error, handler, http::StatusCode, web::{Data, Json, headers::Header}
 };
@@ -44,14 +45,17 @@ pub fn sign_in(
 
     match user_id {
         Ok(user_id) => {
-            let response = SignInOutput{
-                jwt: user_id
-            };
             let my_claims = Claims {
                 sub : user_id,
                 expire: 24
             };
-            let token = encode(&Header::default(), &my_claims, &EncodingKey::from_status("secret".as_ref()))?;
+            let token = encode(&Header::default(),
+            &my_claims, &EncodingKey::from_secret("secret".as_ref()))
+            .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
+        
+            let response = SignInOutput{
+                jwt: token
+            };
             Ok(Json(response))
         }
         Err(_) => Err(Error::from_status(StatusCode::UNAUTHORIZED))

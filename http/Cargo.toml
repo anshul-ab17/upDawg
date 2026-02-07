@@ -11,3 +11,4 @@ diesel = { version = "2.3.6", features = ["postgres"] }
 tokio = { version = "1.49.0", features = ["full"] }
 dotenvy = "0.15.7"
 jsonwebtokens = "1.2.0"
+jsonwebtoken = "10.3.0"
