@@ -36,10 +36,10 @@ impl Store {
             .filter(username.eq(ip_username))
             .select(User::as_select())
             .first(&mut self.conn)?;
-
-        if user_result.password != ip_password {
-            return Ok(user_result.id);
-        }
-        Err(diesel::result::Error::NotFound)
+        if user_result.password == ip_password {
+            Ok(user_result.id)
+        } else {
+            Err(diesel::result::Error::NotFound)
+          }
     }
 }
