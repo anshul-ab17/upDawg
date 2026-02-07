@@ -1,13 +1,13 @@
 use std::{sync::{Arc, Mutex}};
 use jsonwebtoken::{EncodingKey, Header, encode};
 use poem::{
-  Error, handler, http::StatusCode, web::{Data, Json, headers::Header}
+  Error, handler, http::StatusCode, web::{Data, Json}
 };
 // OLD: schema-level import, caused tight coupling with Diesel schema
 // use db::{schema::website::user_id, store::Store};
 // NEW: only depend on Store abstraction
 use db::store::Store;
-use crate::req_input::CreateUserInput;
+use crate::{middleware::authmiddleware::UserId, req_input::CreateUserInput};
 use crate::req_output::{CreateUserOutput,SignInOutput};
 use serde::{Serialize, Deserialize};
 
@@ -19,7 +19,8 @@ struct Claims {
 
 #[handler]
 pub fn sign_up(
-    Json(data): Json<CreateUserInput>,Data(db): Data<&Arc<Mutex<Store>>>
+    Json(data): Json<CreateUserInput>,
+    Data(db): Data<&Arc<Mutex<Store>>>,
 ) -> Result<Json<CreateUserOutput>,Error> {
     let mut locked_db = db.lock().unwrap(); 
     let user_id = locked_db
@@ -37,7 +38,7 @@ pub fn sign_up(
 #[handler]
 pub fn sign_in(
     Json(data) : Json<CreateUserInput>, 
-    Data(db): Data<&Arc<Mutex<Store>>>
+    Data(db): Data<&Arc<Mutex<Store>>>,
 ) -> Result<Json<SignInOutput>, Error> { 
     let mut locked_db = db.lock().unwrap(); 
     let user_id=locked_db
@@ -52,7 +53,7 @@ pub fn sign_in(
             let token = encode(&Header::default(),
             &my_claims, &EncodingKey::from_secret("secret".as_ref()))
             .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
-        
+
             let response = SignInOutput{
                 jwt: token
             };

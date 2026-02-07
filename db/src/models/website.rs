@@ -32,11 +32,12 @@ impl Store {
         Ok(wesite)
     }
 
-    pub fn get_website(&mut self,input_id:String) 
+    pub fn get_website(&mut self,input_id:String, ip_user_id: String) 
     -> Result<Website, diesel::result::Error> {
         use crate::schema::website::dsl::*;
         let website_result = website
             .filter(id.eq(input_id))
+            .filter(user_id.eq(ip_user_id))
             .select(Website::as_select())
             .first(&mut self.conn)?;
         Ok(website_result)
