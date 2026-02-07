@@ -10,9 +10,8 @@ use db::store::Store;
 use crate::{req_input::CreateUserInput};
 use crate::req_output::{CreateUserOutput,SignInOutput};
 use serde::{Serialize, Deserialize};
-
 #[derive(Debug,Serialize, Deserialize)]
-struct Claims {
+pub struct Claims {
     pub sub: String,
     expire:usize
 }
