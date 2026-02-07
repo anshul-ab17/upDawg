@@ -7,13 +7,13 @@ use poem::{
 // use db::{schema::website::user_id, store::Store};
 // NEW: only depend on Store abstraction
 use db::store::Store;
-use crate::{middleware::authmiddleware::UserId, req_input::CreateUserInput};
+use crate::{req_input::CreateUserInput};
 use crate::req_output::{CreateUserOutput,SignInOutput};
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug,Serialize, Deserialize)]
 struct Claims {
-    sub: String,
+    pub sub: String,
     expire:usize
 }
 
