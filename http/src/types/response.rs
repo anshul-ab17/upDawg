@@ -1,23 +1,22 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct CreateWebsiteOutput{
-    pub id:String
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct CreateUserOutput {
-    pub id : String
+    pub id: String,
 }
-
 
 #[derive(Serialize, Deserialize)]
 pub struct SignInOutput {
-    pub jwt : String
+    pub jwt: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct CreateWebsiteOutput {
+    pub id: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct GetWebsiteOutput {
-    pub url : String,
-    pub id  : String
+    pub id: String,
+    pub url: String,
 }

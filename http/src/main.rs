@@ -1,27 +1,49 @@
-use std::{sync::{Arc, Mutex}};
 use poem::{
- EndpointExt, Route, Server, get,listener::TcpListener, middleware::AddDataEndpoint, post
+    EndpointExt,
+    Route,
+    Server,
+    get,
+    post,
+    listener::TcpListener,
 };
-use db::{store::Store};
 
-use crate::routes::{user::{sign_in, sign_up}, website::{create_website, get_website}};
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::pg::PgConnection;
+
+use crate::routes::{
+    user::{sign_in, sign_up},
+    website::{create_website, get_website}
+};
+
 pub mod routes;
-pub mod req_input;
-pub mod req_output;
 pub mod middleware;
+pub mod services;
+pub mod types;
+pub mod utils;
+pub mod errors;
 
-#[tokio::main(flavor ="multi_thread")]
+pub type DbPool = Pool<ConnectionManager<PgConnection>>;
+
+#[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-    let db = Arc::new(Mutex::new(Store::new().unwrap()));
-    let app:AddDataEndpoint<Route, Arc<_>> = Route::new()
-        .at("/website/:website_id", get(get_website))
-        .at("/website", post(create_website))
+
+    let database_url = std::env::var("DATABASE_URL").unwrap();
+
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+
+    let pool: DbPool = Pool::builder()
+        .max_size(15)
+        .build(manager)
+        .unwrap();
+
+    let app = Route::new()
         .at("/user/signup", post(sign_up))
         .at("/user/signin", post(sign_in))
-        .data(db);
-        // .with(Tracing);
+        .at("/website", post(create_website))
+        .at("/website/:id", get(get_website))
+        .data(pool);
+
     Server::new(TcpListener::bind("0.0.0.0:3003"))
-      .name("web")
-      .run(app)
-      .await
+        .run(app)
+        .await
 }

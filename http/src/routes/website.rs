@@ -1,35 +1,48 @@
-use std::{sync::{Arc, Mutex}};
-use poem::{handler, web::{Data, Json, Path}}; 
-use db::{store::Store};
-use crate::{middleware::authmiddleware::UserId, req_input::CreateWebsiteInput};
-use crate::req_output::{CreateWebsiteOutput, GetWebsiteOutput};
+use poem::{handler, web::{Data, Json, Path}};
+use db::store::Store;
+
+use crate::middleware::authmiddleware::UserId;
+use crate::types::request::CreateWebsiteInput;
+use crate::types::response::{CreateWebsiteOutput, GetWebsiteOutput};
+use crate::DbPool;
 
 #[handler]
 pub fn create_website(
-    Json(data): Json<CreateWebsiteInput> , 
-    Data(db): Data<&Arc<Mutex<Store>>> ,
-    UserId(_user_id) :UserId
+    Json(data): Json<CreateWebsiteInput>,
+    Data(pool): Data<&DbPool>,
+    UserId(user_id): UserId
 ) -> Json<CreateWebsiteOutput> {
-    let mut locked_db = db.lock().unwrap(); 
-    let website = locked_db.create_website(String::from
-        ("803b50f8-330e-4c5c-b264-eca313136efb"), data.url).unwrap();
-    let response = CreateWebsiteOutput {
-        id:website.id
-    };
-    Json(response)
+
+    let conn = pool.get().unwrap();
+
+    let mut store = Store { conn };
+
+    let website = store
+        .create_website(user_id, data.url)
+        .unwrap();
+
+    Json(CreateWebsiteOutput {
+        id: website.id
+    })
 }
 
 #[handler]
 pub fn get_website(
-    Path(id) : Path<String>,
-    Data(db): Data<&Arc<Mutex<Store>>>,
-    UserId(user_id) :UserId
-) -> Json<GetWebsiteOutput> { 
-    let mut locked_db = db.lock().unwrap();
-    let website =locked_db.get_website(id,user_id).unwrap();
-    Json(
-        GetWebsiteOutput {
-        url : website.url,
+    Path(id): Path<String>,
+    Data(pool): Data<&DbPool>,
+    UserId(user_id): UserId
+) -> Json<GetWebsiteOutput> {
+
+    let conn = pool.get().unwrap();
+
+    let mut store = Store { conn };
+
+    let website = store
+        .get_website(id, user_id)
+        .unwrap();
+
+    Json(GetWebsiteOutput {
+        url: website.url,
         id: website.id
     })
 }
