@@ -1,23 +1,27 @@
-use std::sync::{Arc, Mutex};
+use diesel::pg::PgConnection;
+use diesel::result::Error;
 
-use db::store::Store;
+use db::queries::user_queries::{sign_in_user, sign_up_user};
 
-pub struct UserService {
-    db: Arc<Mutex<Store>>,
-}
+pub struct UserService;
 
 impl UserService {
-    pub fn new(db: Arc<Mutex<Store>>) -> Self {
-        Self { db }
+
+    pub fn signup(
+        conn: &mut PgConnection,
+        username: String,
+        password: String,
+    ) -> Result<String, Error> {
+
+        sign_up_user(conn, username, password)
     }
 
-    pub fn signup(&self, username: String, password: String) -> Result<String, diesel::result::Error> {
-        let mut db = self.db.lock().unwrap();
-        db.sign_up(username, password)
-    }
+    pub fn signin(
+        conn: &mut PgConnection,
+        username: String,
+        password: String,
+    ) -> Result<String, Error> {
 
-    pub fn signin(&self, username: String, password: String) -> Result<String, diesel::result::Error> {
-        let mut db = self.db.lock().unwrap();
-        db.sign_in(username, password)
+        sign_in_user(conn, username, password)
     }
 }

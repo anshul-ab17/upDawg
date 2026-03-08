@@ -1,33 +1,28 @@
-use std::sync::{Arc, Mutex};
+use diesel::pg::PgConnection;
+use diesel::result::Error;
 
-use db::store::Store;
 use db::models::website::Website;
+use db::queries::website_queries::{create_website, get_website};
 
-pub struct WebsiteService {
-    db: Arc<Mutex<Store>>,
-}
+pub struct WebsiteService;
 
 impl WebsiteService {
 
-    pub fn new(db: Arc<Mutex<Store>>) -> Self {
-        Self { db }
-    }
-
     pub fn create_website(
-        &self,
+        conn: &mut PgConnection,
         user_id: String,
         url: String,
-    ) -> Result<Website, diesel::result::Error> {
-        let mut db = self.db.lock().unwrap();
-        db.create_website(user_id, url)
+    ) -> Result<Website, Error> {
+
+        create_website(conn, user_id, url)
     }
 
     pub fn get_website(
-        &self,
+        conn: &mut PgConnection,
         id: String,
         user_id: String,
-    ) -> Result<Website, diesel::result::Error> {
-        let mut db = self.db.lock().unwrap();
-        db.get_website(id, user_id)
+    ) -> Result<Website, Error> {
+
+        get_website(conn, id, user_id)
     }
 }

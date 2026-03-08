@@ -1,13 +1,13 @@
 use diesel::prelude::*;
 use uuid::Uuid;
 
-use crate::models::user::User;
 use crate::schema::user;
+use crate::models::user::User;
 
-pub fn sign_up(
+pub fn sign_up_user(
     conn: &mut PgConnection,
     username: String,
-    password: String
+    password: String,
 ) -> Result<String, diesel::result::Error> {
 
     let id = Uuid::new_v4().to_string();
@@ -15,7 +15,7 @@ pub fn sign_up(
     let new_user = User {
         id: id.clone(),
         username,
-        password
+        password,
     };
 
     diesel::insert_into(user::table)
@@ -25,21 +25,20 @@ pub fn sign_up(
     Ok(id)
 }
 
-pub fn sign_in(
+pub fn sign_in_user(
     conn: &mut PgConnection,
-    uname: String,
-    pass: String
+    ip_username: String,
+    ip_password: String,
 ) -> Result<String, diesel::result::Error> {
 
     use crate::schema::user::dsl::*;
 
-    let result = user
-        .filter(username.eq(uname))
-        .select(User::as_select())
+    let user_result: User = user
+        .filter(username.eq(ip_username))
         .first(conn)?;
 
-    if result.password == pass {
-        Ok(result.id)
+    if user_result.password == ip_password {
+        Ok(user_result.id)
     } else {
         Err(diesel::result::Error::NotFound)
     }

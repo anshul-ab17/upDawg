@@ -1,16 +1,16 @@
-use jsonwebtoken::{encode, EncodingKey, Header};
 use poem::{
-    Error,
     handler,
     http::StatusCode,
-    web::{Data, Json}
+    web::{Data, Json},
+    Error,
 };
 
-use db::store::Store;
+use jsonwebtoken::{encode, EncodingKey, Header};
 
+use crate::DbPool;
+use crate::services::user_service::UserService;
 use crate::types::request::CreateUserInput;
 use crate::types::response::{CreateUserOutput, SignInOutput};
-use crate::DbPool;
 
 use serde::{Serialize, Deserialize};
 
@@ -26,13 +26,18 @@ pub fn sign_up(
     Data(pool): Data<&DbPool>,
 ) -> Result<Json<CreateUserOutput>, Error> {
 
-    let conn = pool.get().unwrap();
+    // get db connection
+    let mut conn = pool
+        .get()
+        .map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
 
-    let mut store = Store { conn };
-
-    let user_id = store
-        .sign_up(data.username, data.password)
-        .map_err(|_| Error::from_status(StatusCode::CONFLICT))?;
+    // call service
+    let user_id = UserService::signup(
+        &mut conn,
+        data.username,
+        data.password,
+    )
+    .map_err(|_| Error::from_status(StatusCode::CONFLICT))?;
 
     Ok(Json(CreateUserOutput { id: user_id }))
 }
@@ -43,30 +48,29 @@ pub fn sign_in(
     Data(pool): Data<&DbPool>,
 ) -> Result<Json<SignInOutput>, Error> {
 
-    let conn = pool.get().unwrap();
+    let mut conn = pool
+        .get()
+        .map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
 
-    let mut store = Store { conn };
+    let user_id = UserService::signin(
+        &mut conn,
+        data.username,
+        data.password,
+    )
+    .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
 
-    let user_id = store.sign_in(data.username, data.password);
+    // create JWT
+    let claims = Claims {
+        sub: user_id,
+        expire: 24,
+    };
 
-    match user_id {
-        Ok(user_id) => {
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret("secret".as_ref()),
+    )
+    .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
 
-            let claims = Claims {
-                sub: user_id,
-                expire: 24,
-            };
-
-            let token = encode(
-                &Header::default(),
-                &claims,
-                &EncodingKey::from_secret("secret".as_ref()),
-            )
-            .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
-
-            Ok(Json(SignInOutput { jwt: token }))
-        }
-
-        Err(_) => Err(Error::from_status(StatusCode::UNAUTHORIZED)),
-    }
+    Ok(Json(SignInOutput { jwt: token }))
 }

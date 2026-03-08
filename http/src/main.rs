@@ -10,9 +10,12 @@ use poem::{
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::pg::PgConnection;
 
+use dotenvy::dotenv;
+use std::env;
+
 use crate::routes::{
     user::{sign_in, sign_up},
-    website::{create_website, get_website}
+    website::{create_website, get_website},
 };
 
 pub mod routes;
@@ -27,14 +30,17 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
 
-    let database_url = std::env::var("DATABASE_URL").unwrap();
+    dotenv().ok();
+
+    let database_url =
+        env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     let manager = ConnectionManager::<PgConnection>::new(database_url);
 
     let pool: DbPool = Pool::builder()
         .max_size(15)
         .build(manager)
-        .unwrap();
+        .expect("Failed to create DB pool");
 
     let app = Route::new()
         .at("/user/signup", post(sign_up))

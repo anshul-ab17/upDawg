@@ -1,10 +1,11 @@
 use poem::{handler, web::{Data, Json, Path}};
-use db::store::Store;
+
+use crate::{DbPool};
+use crate::services::website_service::WebsiteService;
 
 use crate::middleware::authmiddleware::UserId;
 use crate::types::request::CreateWebsiteInput;
 use crate::types::response::{CreateWebsiteOutput, GetWebsiteOutput};
-use crate::DbPool;
 
 #[handler]
 pub fn create_website(
@@ -13,13 +14,13 @@ pub fn create_website(
     UserId(user_id): UserId
 ) -> Json<CreateWebsiteOutput> {
 
-    let conn = pool.get().unwrap();
+    let mut conn = pool.get().unwrap();
 
-    let mut store = Store { conn };
-
-    let website = store
-        .create_website(user_id, data.url)
-        .unwrap();
+    let website = WebsiteService::create_website(
+        &mut conn,
+        user_id,
+        data.url
+    ).unwrap();
 
     Json(CreateWebsiteOutput {
         id: website.id
@@ -33,13 +34,13 @@ pub fn get_website(
     UserId(user_id): UserId
 ) -> Json<GetWebsiteOutput> {
 
-    let conn = pool.get().unwrap();
+    let mut conn = pool.get().unwrap();
 
-    let mut store = Store { conn };
-
-    let website = store
-        .get_website(id, user_id)
-        .unwrap();
+    let website = WebsiteService::get_website(
+        &mut conn,
+        id,
+        user_id
+    ).unwrap();
 
     Json(GetWebsiteOutput {
         url: website.url,
