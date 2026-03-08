@@ -1,0 +1,43 @@
+use diesel::prelude::*;
+use uuid::Uuid;
+use chrono::Utc;
+
+use crate::models::website::Website;
+use crate::schema::website;
+
+pub fn create_website(
+    conn: &mut PgConnection,
+    user_id: String,
+    url: String,
+) -> Result<Website, diesel::result::Error> {
+
+    let id = Uuid::new_v4().to_string();
+
+    let website = Website {
+        id: id.clone(),
+        url,
+        user_id,
+        time_added: Utc::now().naive_utc(),
+    };
+
+    diesel::insert_into(website::table)
+        .values(&website)
+        .execute(conn)?;
+
+    Ok(website)
+}
+
+pub fn get_website(
+    conn: &mut PgConnection,
+    input_id: String,
+    ip_user_id: String,
+) -> Result<Website, diesel::result::Error> {
+
+    use crate::schema::website::dsl::*;
+
+    website
+        .filter(id.eq(input_id))
+        .filter(user_id.eq(ip_user_id))
+        .select(Website::as_select())
+        .first(conn)
+}
