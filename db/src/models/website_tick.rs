@@ -1,10 +1,11 @@
 use diesel::prelude::*;
 use chrono::NaiveDateTime;
 use serde::{Serialize, Deserialize};
+use diesel_derive_enum::DbEnum;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, AsExpression, FromSqlRow)]
-#[diesel(sql_type = crate::schema::sql_types::WebsiteStatus)]
-pub enum WebsiteStatus {
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, DbEnum)]
+#[ExistingTypePath = "crate::schema::sql_types::WebsiteStatus"]
+pub enum WebsiteStatusEnum {
     Up,
     Down,
 }
@@ -15,7 +16,7 @@ pub enum WebsiteStatus {
 pub struct WebsiteTick {
     pub id: String,
     pub response_time: i32,
-    pub status: WebsiteStatus,
+    pub status: WebsiteStatusEnum,
     pub region_id: String,
     pub website_id: String,
 
