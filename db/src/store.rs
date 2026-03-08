@@ -1,16 +1,14 @@
-use diesel::prelude::*;
-use crate::config::Config;
+use diesel::pg::PgConnection;
+use diesel::r2d2::{ConnectionManager, PooledConnection};
+
+pub type DbConn = PooledConnection<ConnectionManager<PgConnection>>;
 
 pub struct Store {
-    pub conn: PgConnection
+    pub conn: DbConn
 }
 
 impl Store {
-    pub fn new() -> Result<Self, ConnectionError> {
-        let config = Config::default();
-        let conn = PgConnection::establish(&config.db_url)?;
-        Ok(Self {
-            conn
-        })
+    pub fn new(conn: DbConn) -> Self {
+        Self { conn }
     }
 }
