@@ -11,6 +11,7 @@ pub struct WebsiteTick {
     pub status: String,
     pub region_id: String,
     pub website_id: String,
+
     #[diesel(column_name = createdat)]
     pub created_at: NaiveDateTime,
 }
