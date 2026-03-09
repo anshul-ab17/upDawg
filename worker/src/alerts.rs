@@ -4,7 +4,6 @@ use lettre::{
     transport::smtp::authentication::Credentials
 };
 
-use reqwest::Client;
 
 pub async fn send_email(
     smtp_user: &str,
@@ -31,15 +30,4 @@ pub async fn send_email(
         .build();
 
     let _ = mailer.send(email).await;
-}
-
-pub async fn send_webhook(url: &str, payload: serde_json::Value) {
-
-    let client = Client::new();
-
-    let _ = client
-        .post(url)
-        .json(&payload)
-        .send()
-        .await;
 }

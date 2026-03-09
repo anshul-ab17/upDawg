@@ -5,18 +5,13 @@ mod alerts;
 
 use redis::AsyncCommands;
 use serde_json::Value;
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-
+    dotenv::dotenv().ok(); 
     let cfg = config::Config::from_env();
-
     let client = redis::Client::open(cfg.redis_url.clone())?;
-
     let mut conn = client.get_async_connection().await?;
-
     println!("Updawg worker started in region: {}", cfg.region);
-
     // enqueue monitoring jobs
     scheduler::enqueue_jobs(&mut conn).await?;
 
@@ -50,16 +45,6 @@ async fn main() -> anyhow::Result<()> {
                 &cfg.email_pass,
                 &cfg.alert_email,
                 url
-            ).await;
-
-            alerts::send_webhook(
-                "https://example.com/webhook",
-                serde_json::json!({
-                    "site": url,
-                    "status": "DOWN",
-                    "latency": latency,
-                    "region": cfg.region
-                })
             ).await;
         }
     }

@@ -10,14 +10,24 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> Self {
+
         dotenv::dotenv().ok();
 
         Self {
-            redis_url: env::var("REDIS_URL").unwrap(),
-            region: env::var("REGION").unwrap_or("india".into()),
-            email_user: env::var("SMTP_USER").unwrap(),
-            email_pass: env::var("SMTP_PASS").unwrap(),
-            alert_email: env::var("ALERT_EMAIL").unwrap(),
+            redis_url: env::var("REDIS_URL")
+                .expect("REDIS_URL missing"),
+
+            region: env::var("REGION")
+                .unwrap_or("local".into()),
+
+            email_user: env::var("SMTP_USER")
+                .unwrap_or("dev@test.com".into()),
+
+            email_pass: env::var("SMTP_PASS")
+                .unwrap_or("devpass".into()),
+
+            alert_email: env::var("ALERT_EMAIL")
+                .unwrap_or("alerts@test.com".into()),
         }
     }
 }
