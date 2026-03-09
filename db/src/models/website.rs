@@ -10,3 +10,4 @@ pub struct Website {
     pub user_id: String,
     pub time_added: NaiveDateTime,
 }
+ 

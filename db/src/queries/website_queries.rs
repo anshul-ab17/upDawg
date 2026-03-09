@@ -41,3 +41,12 @@ pub fn get_website(
         .select(Website::as_select())
         .first(conn)
 }
+
+pub fn get_all_websites(
+    conn: &mut PgConnection,
+) -> Result<Vec<Website>, diesel::result::Error> {
+
+    website::table
+        .select(Website::as_select())
+        .load(conn)
+}
