@@ -1,45 +1,21 @@
 "use client"
 
-import { useState } from "react"
-import { useDispatch } from "react-redux"
-import { AppDispatch } from "@/store/store"
-import { addWebsite } from "@/store/websiteSlice"
+import { useSites } from "../hooks/useSites"
 
-export default function AddSiteForm() {
+export default function SiteList() {
+  const { sites, isLoading } = useSites()
 
-  const [url, setUrl] = useState("")
-  const dispatch = useDispatch<AppDispatch>()
-
-  const handleAdd = async () => {
-
-    if (!url.trim()) {
-      alert("URL required")
-      return
-    }
-
-    dispatch(addWebsite(url))
-
-    setUrl("")
-  }
+  if (isLoading) return <p>Loading...</p>
 
   return (
-    <div className="flex gap-3">
-
-      <input
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://example.com"
-        className="border p-2 text-black"
-      />
-
-      <button
-        type="button"
-        onClick={handleAdd}
-        className="bg-blue-600 text-white px-4 py-2"
-      >
-        Add
-      </button>
-
+    <div>
+      {sites?.map((site) => (
+        <div key={site.id}>
+          <p>{site.url}</p>
+          <p>Status: {site.status}</p>
+          <p>Latency: {site.latency} ms</p>
+        </div>
+      ))}
     </div>
   )
 }

@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit"
-import websiteReducer from "./websiteSlice"
+import siteReducer from "./siteSlice"
 
 export const store = configureStore({
   reducer: {
-    websites: websiteReducer
-  }
+    sites: siteReducer,
+  },
 })
 
 export type RootState = ReturnType<typeof store.getState>
