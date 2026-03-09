@@ -1,32 +1,31 @@
 "use client"
 
 import { useState } from "react"
-import { useSiteStore } from "@/store/siteStore"
+import { useDispatch } from "react-redux"
+import { AppDispatch } from "@/store/store"
+import { addWebsite } from "@/store/websiteSlice"
 
 export default function AddSiteForm() {
 
   const [url, setUrl] = useState("")
-  const addSite = useSiteStore((s) => s.addSite)
+  const dispatch = useDispatch<AppDispatch>()
 
-  const submit = async () => {
-
-    console.log("URL typed:", url)
+  const handleAdd = async () => {
 
     if (!url.trim()) {
       alert("URL required")
       return
     }
 
-    await addSite(url)
+    dispatch(addWebsite(url))
 
     setUrl("")
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-3">
 
       <input
-        type="text"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder="https://example.com"
@@ -35,8 +34,8 @@ export default function AddSiteForm() {
 
       <button
         type="button"
-        onClick={submit}
-        className="bg-blue-500 text-white px-4 py-2"
+        onClick={handleAdd}
+        className="bg-blue-600 text-white px-4 py-2"
       >
         Add
       </button>
