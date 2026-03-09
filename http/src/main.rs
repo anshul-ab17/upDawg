@@ -1,4 +1,5 @@
 use poem::{
+    middleware::Cors,
     EndpointExt,
     Route,
     Server,
@@ -41,15 +42,20 @@ async fn main() -> Result<(), std::io::Error> {
         .max_size(15)
         .build(manager)
         .expect("Failed to create DB pool");
+    let cors = Cors::new()
+    .allow_origin("http://localhost:3000")
+    .allow_methods(["GET", "POST"])
+    .allow_headers(["Content-Type", "Authorization"]);
 
     let app = Route::new()
         .at("/user/signup", post(sign_up))
         .at("/user/signin", post(sign_in))
         .at("/website", post(create_website))
         .at("/website/:id", get(get_website))
-        .data(pool);
+        .data(pool)
+        .with(cors);
 
-    Server::new(TcpListener::bind("0.0.0.0:3003"))
+    Server::new(TcpListener::bind("0.0.0.0:3001"))
         .run(app)
         .await
 }

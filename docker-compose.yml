@@ -1,15 +1,26 @@
-version: "3"
+version: "3.9"
+
 services:
 
   redis:
     image: redis
+    container_name: updawg-redis
     ports:
       - "6371:6379"
+    restart: unless-stopped
 
   postgres:
     image: postgres
+    container_name: updawg-postgres
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: updawg
     ports:
       - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
