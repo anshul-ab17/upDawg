@@ -23,7 +23,7 @@ pub mod middleware;
 pub mod services;
 pub mod types;
 pub mod utils;
-pub mod errors;
+pub mod error;
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
