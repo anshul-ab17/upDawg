@@ -3,7 +3,6 @@ use serde_json::json;
 
 pub async fn enqueue_jobs(redis: &mut redis::aio::Connection) -> anyhow::Result<()> {
 
-    // Normally fetch from DB
     let sites = vec![
         ("1", "https://google.com"),
         ("2", "https://example.com")
@@ -16,7 +15,9 @@ pub async fn enqueue_jobs(redis: &mut redis::aio::Connection) -> anyhow::Result<
             "url": url
         });
 
-        redis.lpush("monitor_queue", job.to_string()).await?;
+        redis
+            .lpush::<_, _, ()>("monitor_queue", job.to_string())
+            .await?;
     }
 
     Ok(())

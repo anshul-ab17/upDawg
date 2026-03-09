@@ -11,17 +11,26 @@ async fn main() -> anyhow::Result<()> {
 
     let cfg = config::Config::from_env();
 
-    let client = redis::Client::open(cfg.redis_url)?;
+    let client = redis::Client::open(cfg.redis_url.clone())?;
 
     let mut conn = client.get_async_connection().await?;
 
+    println!("Updawg worker started in region: {}", cfg.region);
+
+    // enqueue monitoring jobs
+    scheduler::enqueue_jobs(&mut conn).await?;
+
     loop {
 
-        let job: String = conn.brpop("monitor_queue", 0).await?.1;
+        //pop job from Redis queue
+        let (_key, job): (String, String) =
+            conn.brpop("monitor_queue", 0).await?;
 
         let job: Value = serde_json::from_str(&job)?;
 
         let url = job["url"].as_str().unwrap();
+
+        println!("Checking {}", url);
 
         let (ok, latency) = monitor::check_website(url).await;
 
@@ -33,6 +42,8 @@ async fn main() -> anyhow::Result<()> {
         );
 
         if !ok {
+
+            println!("ALERT: {} is DOWN", url);
 
             alerts::send_email(
                 &cfg.email_user,
