@@ -9,6 +9,7 @@ import { AppDispatch } from "@/store/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import ThemeToggle from "@/components/ThemeToggle"
 import Link from "next/link"
 
 export default function SignIn() {
@@ -26,6 +27,7 @@ export default function SignIn() {
 
     try {
       const res = await api.post<{ jwt: string }>("/user/signin", { username, password })
+      localStorage.setItem("token", res.data.jwt)
       dispatch(setToken(res.data.jwt))
       router.push("/dashboard")
     } catch {
@@ -37,32 +39,47 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">upDawg</CardTitle>
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
+      <Card className="w-full max-w-md px-2">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-3xl font-bold">upDawg</CardTitle>
+          <p className="text-base text-muted-foreground mt-1">Sign in to your account</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="text-base font-medium">Username</label>
+              <Input
+                className="h-11 text-base"
+                autoComplete="username"
+                placeholder="your-username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-base font-medium">Password</label>
+              <Input
+                className="h-11 text-base"
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-base text-destructive">{error}</p>}
+            <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
-            <p className="text-sm text-center text-muted-foreground">
+            <p className="text-base text-center text-muted-foreground">
               No account?{" "}
-              <Link href="/signup" className="underline">
+              <Link href="/signup" className="underline text-foreground">
                 Sign up
               </Link>
             </p>

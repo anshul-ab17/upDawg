@@ -5,11 +5,11 @@ import { RootState } from "@/store/store"
 import { Website } from "@/store/websiteSlice"
 import { Card } from "@/components/ui/card"
 
-function StatusBadge({ status }: { status?: "UP" | "DOWN" }) {
-  if (!status) {
+function StatusBadge({ status }: { status?: boolean | null }) {
+  if (status === undefined || status === null) {
     return <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Pending</span>
   }
-  return status === "UP"
+  return status
     ? <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">UP</span>
     : <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">DOWN</span>
 }

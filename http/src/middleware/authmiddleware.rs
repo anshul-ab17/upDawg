@@ -12,14 +12,14 @@ impl<'a> FromRequest<'a> for UserId {
             .headers()
             .get("authorization")
             .and_then(|value| value.to_str().ok())
-            .ok_or_else(|| Error::from_string("missing token", StatusCode::BAD_REQUEST))?;
+            .ok_or_else(|| Error::from_string("missing token", StatusCode::UNAUTHORIZED))?;
 
         let token_data = decode::<Claims>(
             &token,
             &DecodingKey::from_secret("secret".as_ref()),
             &Validation::default(),
         )
-        .map_err(|_| Error::from_string("invalid token format", StatusCode::BAD_REQUEST))?;
+        .map_err(|_| Error::from_string("invalid token", StatusCode::UNAUTHORIZED))?;
 
         Ok(UserId(token_data.claims.sub))
     }

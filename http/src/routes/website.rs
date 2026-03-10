@@ -3,8 +3,8 @@ use crate::DbPool;
 use crate::services::website_service::WebsiteService;
 use crate::middleware::authmiddleware::UserId;
 use crate::types::request::CreateWebsiteInput;
-use crate::types::response::{CreateWebsiteOutput, GetWebsiteOutput};
-use db::models::website::Website;
+use crate::types::response::{CreateWebsiteOutput, GetWebsiteOutput, WebsiteWithStatus};
+use db::queries::tick_queries::get_latest_tick;
 
 #[handler]
 pub fn create_website(
@@ -50,10 +50,21 @@ pub fn get_website(
 #[handler]
 pub fn list_websites(
     Data(pool): Data<&DbPool>,
-    UserId(user_id): UserId,     
-) -> Json<Vec<Website>> {
+    UserId(user_id): UserId,
+) -> Json<Vec<WebsiteWithStatus>> {
 
     let mut conn = pool.get().unwrap();
-    let websites = WebsiteService::get_all_websites(&mut conn, user_id).unwrap();  // ← pass it
-    Json(websites)
+    let websites = WebsiteService::get_all_websites(&mut conn, user_id).unwrap();
+
+    let result = websites.into_iter().map(|w| {
+        let tick = get_latest_tick(&mut conn, &w.id).ok();
+        WebsiteWithStatus {
+            id: w.id,
+            url: w.url,
+            status: tick.as_ref().map(|t| t.status),
+            latency: tick.as_ref().map(|t| t.response_time),
+        }
+    }).collect();
+
+    Json(result)
 }

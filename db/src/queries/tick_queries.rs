@@ -5,6 +5,18 @@ use uuid::Uuid;
 use crate::models::website_tick::{NewWebsiteTick, WebsiteTick};
 use crate::schema::website_tick;
 
+pub fn get_latest_tick(
+    conn: &mut PgConnection,
+    w_id: &str,
+) -> QueryResult<WebsiteTick> {
+    use crate::schema::website_tick::dsl::*;
+
+    website_tick
+        .filter(website_id.eq(w_id))
+        .order(created_at.desc())
+        .first(conn)
+}
+
 pub fn insert_tick(
     conn: &mut PgConnection,
     website_id: Uuid,

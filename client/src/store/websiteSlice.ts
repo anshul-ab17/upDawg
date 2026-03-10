@@ -4,8 +4,8 @@ import { api } from "@/lib/api"
 export type Website = {
   id: string
   url: string
-  status?: "UP" | "DOWN"
-  latency?: number
+  status?: boolean | null
+  latency?: number | null
 }
 
 export const fetchWebsites = createAsyncThunk("websites/fetch", async () => {
@@ -13,9 +13,13 @@ export const fetchWebsites = createAsyncThunk("websites/fetch", async () => {
   return res.data
 })
 
-export const createWebsite = createAsyncThunk("websites/create", async (url: string) => {
-  const res = await api.post<{ id: string }>("/website", { url })
-  return { id: res.data.id, url }
+export const createWebsite = createAsyncThunk("websites/create", async (url: string, { rejectWithValue }) => {
+  try {
+    const res = await api.post<{ id: string }>("/website", { url })
+    return { id: res.data.id, url }
+  } catch (err: any) {
+    return rejectWithValue(err.response?.status ?? "error")
+  }
 })
 
 const websiteSlice = createSlice({

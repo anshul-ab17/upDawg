@@ -6,6 +6,7 @@ use poem::{
 };
 
 use jsonwebtoken::{encode, EncodingKey, Header};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::DbPool;
 use crate::services::user_service::UserService;
@@ -17,7 +18,7 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
-    pub expire: usize,
+    pub exp: usize,
 }
 
 #[handler]
@@ -59,10 +60,15 @@ pub fn sign_in(
     )
     .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
 
-    // create JWT
+    // create JWT — exp must be a Unix timestamp
+    let exp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as usize + 86400; // 24 hours
+
     let claims = Claims {
         sub: user_id,
-        expire: 24,
+        exp,
     };
 
     let token = encode(

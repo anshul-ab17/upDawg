@@ -20,3 +20,11 @@ pub struct GetWebsiteOutput {
     pub id: String,
     pub url: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct WebsiteWithStatus {
+    pub id: String,
+    pub url: String,
+    pub status: Option<bool>,
+    pub latency: Option<i32>,
+}

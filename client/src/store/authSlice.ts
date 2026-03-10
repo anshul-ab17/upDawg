@@ -1,5 +1,3 @@
-"use client"
-
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 interface AuthState {
@@ -16,17 +14,12 @@ const authSlice = createSlice({
   reducers: {
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload
-      localStorage.setItem("token", action.payload)
     },
     clearToken: (state) => {
       state.token = null
-      localStorage.removeItem("token")
-    },
-    loadToken: (state) => {
-      state.token = localStorage.getItem("token")
     },
   },
 })
 
-export const { setToken, clearToken, loadToken } = authSlice.actions
+export const { setToken, clearToken } = authSlice.actions
 export default authSlice.reducer

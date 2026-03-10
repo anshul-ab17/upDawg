@@ -16,7 +16,7 @@ use std::env;
 
 use crate::routes::{
     user::{sign_in, sign_up},
-    website::{create_website, get_website},
+    website::{create_website, get_website, list_websites},
 };
 
 pub mod routes;
@@ -50,7 +50,7 @@ async fn main() -> Result<(), std::io::Error> {
     let app = Route::new()
         .at("/user/signup", post(sign_up))
         .at("/user/signin", post(sign_in))
-        .at("/website", post(create_website))
+        .at("/website", get(list_websites).post(create_website))
         .at("/website/:id", get(get_website))
         .data(pool)
         .with(cors);
