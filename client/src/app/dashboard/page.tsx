@@ -6,11 +6,18 @@ import { useRouter } from "next/navigation"
 import { AppDispatch } from "@/store/store"
 import { fetchWebsites } from "@/store/websiteSlice"
 import { clearToken } from "@/store/authSlice"
+
 import AddSiteForm from "@/components/AddSiteForm"
 import SiteList from "@/components/SiteList"
 import ThemeToggle from "@/components/ThemeToggle"
-import { Button } from "@/components/ui/button"
-import { Activity } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Activity, UserCircle, LogOut } from "lucide-react"
 
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>()
@@ -52,9 +59,23 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              Sign out
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full p-1 hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <UserCircle className="size-7 text-primary" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 text-destructive focus:text-destructive cursor-pointer"
+                >
+                  <LogOut className="size-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
