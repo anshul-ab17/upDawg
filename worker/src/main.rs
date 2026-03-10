@@ -5,29 +5,42 @@ mod alerts;
 
 use redis::AsyncCommands;
 use serde_json::Value;
+use reqwest::Client;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok(); 
+
+    dotenv::dotenv().ok();
+
     let cfg = config::Config::from_env();
-    let client = redis::Client::open(cfg.redis_url.clone())?;
-    let mut conn = client.get_async_connection().await?;
+
+    let redis_client = redis::Client::open(cfg.redis_url.clone())?;
+    let mut conn = redis_client.get_async_connection().await?;
+
     println!("Updawg worker started in region: {}", cfg.region);
+
+    // HTTP client reused across requests
+    let http_client = Client::new();
+
     // enqueue monitoring jobs
     scheduler::enqueue_jobs(&mut conn).await?;
 
     loop {
 
-        //pop job from Redis queue
+        // block until job available
         let (_key, job): (String, String) =
             conn.brpop("monitor_queue", 0).await?;
 
         let job: Value = serde_json::from_str(&job)?;
 
-        let url = job["url"].as_str().unwrap();
+        let url = job["url"]
+            .as_str()
+            .expect("job missing url");
 
         println!("Checking {}", url);
 
-        let (ok, latency) = monitor::check_website(url).await;
+        let (ok, latency) =
+            monitor::check_website(&http_client, url).await;
 
         println!(
             "{} → {} ({}ms)",
@@ -40,12 +53,14 @@ async fn main() -> anyhow::Result<()> {
 
             println!("ALERT: {} is DOWN", url);
 
-            alerts::send_email(
+            if let Err(e) = alerts::send_email(
                 &cfg.email_user,
                 &cfg.email_pass,
                 &cfg.alert_email,
-                url
-            ).await;
+                url,
+            ).await {
+                eprintln!("Failed to send alert email: {}", e);
+            }
         }
     }
 }

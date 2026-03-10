@@ -1,11 +1,10 @@
 use poem::{handler, web::{Data, Json, Path}};
-
-use crate::{DbPool};
+use crate::DbPool;
 use crate::services::website_service::WebsiteService;
-
 use crate::middleware::authmiddleware::UserId;
 use crate::types::request::CreateWebsiteInput;
 use crate::types::response::{CreateWebsiteOutput, GetWebsiteOutput};
+use db::models::website::Website;
 
 #[handler]
 pub fn create_website(
@@ -49,8 +48,12 @@ pub fn get_website(
 }
 
 #[handler]
-pub async fn list_websites(State(pool): State<PgPool>) -> Json<Vec<Website>> {
+pub fn list_websites(
+    Data(pool): Data<&DbPool>,
+    UserId(user_id): UserId,     
+) -> Json<Vec<Website>> {
+
     let mut conn = pool.get().unwrap();
-    let websites = website_service::get_all_websites(&mut conn).unwrap();
+    let websites = WebsiteService::get_all_websites(&mut conn, user_id).unwrap();  // ← pass it
     Json(websites)
 }

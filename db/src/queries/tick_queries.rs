@@ -23,5 +23,6 @@ pub fn insert_tick(
 
     diesel::insert_into(website_tick::table)
         .values(&new_tick)
+        .returning(WebsiteTick::as_select())
         .get_result(conn)
 }

@@ -3,3 +3,6 @@ incremental = false
 
 [profile.dev]
 debug = 0
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "link-arg=/DEBUG:NONE"]

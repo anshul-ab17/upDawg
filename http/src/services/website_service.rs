@@ -2,6 +2,7 @@ use diesel::pg::PgConnection;
 use diesel::result::Error;
 
 use db::models::website::Website;
+use db::queries::website_queries;                               // ← added for get_all_websites
 use db::queries::website_queries::{create_website, get_website};
 
 pub struct WebsiteService;
@@ -25,7 +26,11 @@ impl WebsiteService {
 
         get_website(conn, id, user_id)
     }
-    pub fn get_all_websites(conn: &mut PgConnection) -> Result<Vec<Website>, diesel::result::Error> {
-        website_queries::get_all_websites(conn)
-    }   
+
+    pub fn get_all_websites(
+        conn: &mut PgConnection,
+        user_id: String,        // ← add this
+    ) -> Result<Vec<Website>, Error> {
+        website_queries::get_all_websites(conn, user_id)  // ← pass it through
+    }
 }

@@ -1,15 +1,13 @@
 use reqwest::Client;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
-pub async fn check_website(url: &str) -> (bool, u128) {
-
-    let client = Client::new();
+pub async fn check_website(client: &Client, url: &str) -> (bool, u128) {
 
     let start = Instant::now();
 
     let res = client
         .get(url)
-        .timeout(std::time::Duration::from_secs(5))
+        .timeout(Duration::from_secs(5))
         .send()
         .await;
 
@@ -17,6 +15,6 @@ pub async fn check_website(url: &str) -> (bool, u128) {
 
     match res {
         Ok(r) => (r.status().is_success(), latency),
-        Err(_) => (false, latency)
+        Err(_) => (false, latency),
     }
 }
