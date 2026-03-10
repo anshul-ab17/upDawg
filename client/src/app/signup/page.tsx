@@ -3,10 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import ThemeToggle from "@/components/ThemeToggle"
+import Navbar from "@/components/Navbar"
 import Link from "next/link"
 
 export default function SignUp() {
@@ -20,7 +19,6 @@ export default function SignUp() {
     e.preventDefault()
     setLoading(true)
     setError("")
-
     try {
       await api.post("/user/signup", { username, password })
       router.push("/signin")
@@ -32,54 +30,53 @@ export default function SignUp() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-
-      <Card className="w-full max-w-md px-2">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-3xl font-bold">Create account</CardTitle>
-          <p className="text-base text-muted-foreground mt-1">Start monitoring your websites</p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-base font-medium">Username</label>
-              <Input
-                className="h-11 text-base"
-                autoComplete="username"
-                placeholder="your-username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1 pt-14 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-card border border-border rounded-xl p-8 shadow-lg space-y-6">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold">Create your account</h1>
+              <p className="text-sm text-muted-foreground">Start monitoring your websites for free</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-base font-medium">Password</label>
-              <Input
-                className="h-11 text-base"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && <p className="text-base text-destructive">{error}</p>}
-            <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
-              {loading ? "Creating account..." : "Sign Up"}
-            </Button>
-            <p className="text-base text-center text-muted-foreground">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Username</label>
+                <Input
+                  className="h-10"
+                  autoComplete="username"
+                  placeholder="your-username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Password</label>
+                <Input
+                  className="h-10"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button type="submit" className="w-full h-10" disabled={loading}>
+                {loading ? "Creating account..." : "Sign Up"}
+              </Button>
+            </form>
+            <p className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/signin" className="underline text-foreground">
+              <Link href="/signin" className="text-primary font-medium hover:underline">
                 Sign in
               </Link>
             </p>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

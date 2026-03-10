@@ -8,6 +8,7 @@ pub struct Claims {
 }
 
 pub fn generate_token(user_id: String) -> String {
+    let secret = std::env::var("JWT_SECRET").unwrap_or_else(|_| "secret".to_string());
 
     let claims = Claims {
         sub: user_id,
@@ -17,7 +18,7 @@ pub fn generate_token(user_id: String) -> String {
     encode(
         &Header::default(),
         &claims,
-        &EncodingKey::from_secret("secret".as_ref()),
+        &EncodingKey::from_secret(secret.as_bytes()),
     )
     .unwrap()
 }

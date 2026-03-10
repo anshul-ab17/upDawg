@@ -14,9 +14,10 @@ impl<'a> FromRequest<'a> for UserId {
             .and_then(|value| value.to_str().ok())
             .ok_or_else(|| Error::from_string("missing token", StatusCode::UNAUTHORIZED))?;
 
+        let secret = std::env::var("JWT_SECRET").unwrap_or_else(|_| "secret".to_string());
         let token_data = decode::<Claims>(
             &token,
-            &DecodingKey::from_secret("secret".as_ref()),
+            &DecodingKey::from_secret(secret.as_bytes()),
             &Validation::default(),
         )
         .map_err(|_| Error::from_string("invalid token", StatusCode::UNAUTHORIZED))?;

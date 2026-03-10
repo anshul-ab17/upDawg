@@ -3,7 +3,7 @@ use diesel::result::Error;
 
 use db::models::website::Website;
 use db::queries::website_queries;                               // ← added for get_all_websites
-use db::queries::website_queries::{create_website, get_website};
+use db::queries::website_queries::{create_website, get_website, delete_website};
 
 pub struct WebsiteService;
 
@@ -25,6 +25,14 @@ impl WebsiteService {
     ) -> Result<Website, Error> {
 
         get_website(conn, id, user_id)
+    }
+
+    pub fn delete_website(
+        conn: &mut PgConnection,
+        id: String,
+        user_id: String,
+    ) -> Result<usize, Error> {
+        delete_website(conn, id, user_id)
     }
 
     pub fn get_all_websites(

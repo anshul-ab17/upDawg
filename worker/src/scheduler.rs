@@ -1,71 +1,53 @@
+use diesel::pg::PgConnection;
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::pg::PgConnection as Pg;
 use redis::AsyncCommands;
 use serde_json::json;
+use tokio::time::{sleep, Duration};
+
+use db::queries::website_queries::get_all_websites_global;
+
+type DbPool = Pool<ConnectionManager<Pg>>;
 
 pub async fn enqueue_jobs(
+    conn: &mut PgConnection,
     redis: &mut redis::aio::Connection,
 ) -> anyhow::Result<()> {
 
-    // Temporary hardcoded websites
-    // Later replace with DB query
-    let sites = vec![
-        ("1", "https://google.com"),
-        ("2", "https://chatgpt.com"),
-        ("3", "https://github.com"),
-        ("4",("https://testingdownsite.com"))
-    ];
+    // Clear existing queue to avoid duplicates
+    let _: () = redis.del("monitor_queue").await?;
 
-    for site in sites {
+    let websites = get_all_websites_global(conn)
+        .map_err(|e| anyhow::anyhow!("DB error: {}", e))?;
 
-        let job = json!({
-            "id": site.0,
-            "url": site.1
-        });
-
-        redis
-            .lpush::<&str, String, ()>("monitor_queue", job.to_string())
-            .await?;
+    for site in &websites {
+        let job = json!({ "id": site.id, "url": site.url });
+        redis.lpush::<&str, String, ()>("monitor_queue", job.to_string()).await?;
     }
 
-    println!("Monitoring jobs enqueued");
-
+    println!("Enqueued {} monitoring jobs", websites.len());
     Ok(())
 }
-// pub async fn run_scheduler() {
 
-//     // reuse one HTTP client
-//     let client = Client::new();
+pub async fn run_scheduler(pool: DbPool, redis_url: String) {
+    loop {
+        sleep(Duration::from_secs(60)).await;
 
-//     // limit concurrent checks
-//     let semaphore = Arc::new(Semaphore::new(50));
+        let redis_client = match redis::Client::open(redis_url.clone()) {
+            Ok(c) => c,
+            Err(e) => { eprintln!("Scheduler redis error: {}", e); continue; }
+        };
+        let mut redis_conn = match redis_client.get_async_connection().await {
+            Ok(c) => c,
+            Err(e) => { eprintln!("Scheduler redis connect error: {}", e); continue; }
+        };
+        let mut db_conn = match pool.get() {
+            Ok(c) => c,
+            Err(e) => { eprintln!("Scheduler db error: {}", e); continue; }
+        };
 
-//     loop {
-
-//         // temporary static list (replace later with DB query)
-//         let sites = vec![
-//             ("1", "https://google.com"),
-//             ("2", "https://chatgpt.com"),
-//             ("3", "https://testingdownsite.com"),
-//         ];
-
-//         for site in sites {
-
-//             let permit = semaphore.clone().acquire_owned().await.unwrap();
-//             let client = client.clone();
-
-//             tokio::spawn(async move {
-
-//                 let (status, latency) = check_website(&client, site.1).await;
-
-//                 println!(
-//                     "site={} status={} latency={}ms",
-//                     site.1, status, latency
-//                 );
-
-//                 drop(permit);
-//             });
-//         }
-
-//         // wait before next monitoring cycle
-//         sleep(Duration::from_secs(10)).await;
-//     }
-// }
+        if let Err(e) = enqueue_jobs(&mut *db_conn, &mut redis_conn).await {
+            eprintln!("Scheduler enqueue error: {}", e);
+        }
+    }
+}

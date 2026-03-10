@@ -43,6 +43,23 @@ pub fn get_website(
 }
 
 
+pub fn delete_website(
+    conn: &mut PgConnection,
+    w_id: String,
+    w_user_id: String,
+) -> QueryResult<usize> {
+    use crate::schema::website::dsl::*;
+    diesel::delete(website.filter(id.eq(w_id)).filter(user_id.eq(w_user_id)))
+        .execute(conn)
+}
+
+pub fn get_all_websites_global(
+    conn: &mut PgConnection,
+) -> QueryResult<Vec<Website>> {
+    use crate::schema::website::dsl::*;
+    website.select(Website::as_select()).load(conn)
+}
+
 pub fn get_all_websites(
     conn: &mut PgConnection,
     ip_user_id: String,

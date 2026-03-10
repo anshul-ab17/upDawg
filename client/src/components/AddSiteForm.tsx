@@ -42,7 +42,7 @@ export default function AddSiteForm() {
     <div className="space-y-2">
       <div className="flex gap-2">
         <Input
-          placeholder="google.com"
+          placeholder="site.com"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}

@@ -13,6 +13,15 @@ export const fetchWebsites = createAsyncThunk("websites/fetch", async () => {
   return res.data
 })
 
+export const removeWebsite = createAsyncThunk("websites/remove", async (id: string, { rejectWithValue }) => {
+  try {
+    await api.delete(`/website/${id}`)
+    return id
+  } catch (err: any) {
+    return rejectWithValue(err.response?.status ?? "error")
+  }
+})
+
 export const createWebsite = createAsyncThunk("websites/create", async (url: string, { rejectWithValue }) => {
   try {
     const res = await api.post<{ id: string }>("/website", { url })
@@ -33,6 +42,9 @@ const websiteSlice = createSlice({
       .addCase(fetchWebsites.fulfilled, (_, action) => action.payload)
       .addCase(createWebsite.fulfilled, (state, action) => {
         state.push(action.payload)
+      })
+      .addCase(removeWebsite.fulfilled, (state, action) => {
+        return state.filter(w => w.id !== action.payload)
       })
   },
 })

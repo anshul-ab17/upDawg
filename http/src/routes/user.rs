@@ -71,10 +71,11 @@ pub fn sign_in(
         exp,
     };
 
+    let secret = std::env::var("JWT_SECRET").unwrap_or_else(|_| "secret".to_string());
     let token = encode(
         &Header::default(),
         &claims,
-        &EncodingKey::from_secret("secret".as_ref()),
+        &EncodingKey::from_secret(secret.as_bytes()),
     )
     .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
 

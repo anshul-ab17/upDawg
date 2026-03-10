@@ -16,6 +16,7 @@ pub struct WebsiteTick {
 #[derive(Insertable)]
 #[diesel(table_name = crate::schema::website_tick)]
 pub struct NewWebsiteTick {
+    pub id: String,
     pub website_id: String,
     pub response_time: i32,
     pub status: bool,

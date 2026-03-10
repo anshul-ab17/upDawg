@@ -1,4 +1,4 @@
-use poem::{handler, web::{Data, Json, Path}};
+use poem::{handler, web::{Data, Json, Path}, http::StatusCode, Response};
 use crate::DbPool;
 use crate::services::website_service::WebsiteService;
 use crate::middleware::authmiddleware::UserId;
@@ -67,4 +67,15 @@ pub fn list_websites(
     }).collect();
 
     Json(result)
+}
+
+#[handler]
+pub fn delete_website(
+    Path(id): Path<String>,
+    Data(pool): Data<&DbPool>,
+    UserId(user_id): UserId,
+) -> Response {
+    let mut conn = pool.get().unwrap();
+    WebsiteService::delete_website(&mut conn, id, user_id).unwrap();
+    Response::builder().status(StatusCode::NO_CONTENT).finish()
 }
