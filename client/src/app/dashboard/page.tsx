@@ -10,33 +10,31 @@ import { clearToken } from "@/store/authSlice"
 import AddSiteForm from "@/components/AddSiteForm"
 import SiteList from "@/components/SiteList"
 import ThemeToggle from "@/components/ThemeToggle"
+import ProfileModal from "@/components/ProfileModal"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Activity, UserCircle, LogOut } from "lucide-react"
+import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { UserCircle, LogOut, Settings } from "lucide-react"
+import dynamic from "next/dynamic"
+
+const DogLogo = dynamic(() => import("@/components/DogLogo"), { ssr: false })
 
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>()
-  const router = useRouter()
-  const [ready, setReady] = useState(false)
+  const router   = useRouter()
+  const [ready, setReady]           = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem("token")
-    if (!token) {
-      router.push("/signin")
-      return
-    }
+    if (!token) { router.push("/signin"); return }
     setReady(true)
     dispatch(fetchWebsites())
-
-    const interval = setInterval(() => {
-      dispatch(fetchWebsites())
-    }, 30000)
-
+    const interval = setInterval(() => dispatch(fetchWebsites()), 30000)
     return () => clearInterval(interval)
   }, [dispatch, router])
 
@@ -53,9 +51,9 @@ export default function Dashboard() {
       {/* Navbar */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
-            <Activity className="size-5 text-primary" />
-            upDawg
+          <div className="flex items-center gap-1.5 font-bold text-lg tracking-tight">
+            <DogLogo size={38} />
+            <span>upDawg</span>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -65,7 +63,14 @@ export default function Dashboard() {
                   <UserCircle className="size-7 text-primary" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => setShowProfile(true)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Settings className="size-4" />
+                  Profile settings
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}
@@ -90,6 +95,8 @@ export default function Dashboard() {
           <SiteList />
         </div>
       </main>
+
+      {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
     </div>
   )
 }

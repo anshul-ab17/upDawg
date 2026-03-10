@@ -9,6 +9,12 @@ import { Input } from "@/components/ui/input"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
   Activity,
   Bell,
   Globe,
@@ -20,8 +26,9 @@ import {
   Lock,
 } from "lucide-react"
 
-// Load Three.js canvas only on client (no SSR)
-const HeroCanvas = dynamic(() => import("@/components/HeroCanvas"), { ssr: false })
+// Load Three.js canvases only on client (no SSR)
+const HeroCanvas  = dynamic(() => import("@/components/HeroCanvas"),  { ssr: false })
+const GlobeCanvas = dynamic(() => import("@/components/GlobeCanvas"), { ssr: false })
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -58,11 +65,6 @@ const FEATURES = [
   },
 ]
 
-const STEPS = [
-  { step: "01", title: "Add a URL", desc: "Paste any URL into the dashboard. We normalise protocols automatically." },
-  { step: "02", title: "We check it", desc: "Our Rust worker hits your URL every 60 seconds and records status + latency." },
-  { step: "03", title: "Get alerted", desc: "Downtime triggers an instant email so you can react before users notice." },
-]
 
 const PRICING = [
   {
@@ -246,26 +248,68 @@ export default function Home() {
       </section>
 
       {/* ── How it works ── */}
-      <section id="how-it-works" className="py-24">
-        <div className="max-w-7xl mx-auto px-6 space-y-12">
-          <div className="text-center space-y-3 max-w-xl mx-auto">
+      <section id="how-it-works" className="py-24 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+
+          {/* Section header */}
+          <div className="text-center space-y-3 max-w-xl mx-auto mb-16">
             <p className="text-sm font-semibold text-primary uppercase tracking-widest">How it works</p>
             <h2 className="text-3xl lg:text-4xl font-extrabold">Up and running in 30 seconds</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connector line */}
-            <div className="hidden md:block absolute top-8 left-1/6 right-1/6 h-px bg-border" />
+          {/* Sticky globe left / scrolling steps right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 
-            {STEPS.map(({ step, title, desc }) => (
-              <div key={step} className="relative flex flex-col items-center text-center gap-4">
-                <div className="size-16 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center z-10">
-                  <span className="text-xl font-black text-primary">{step}</span>
+            {/* Left — sticky globe */}
+            <div className="hidden lg:block sticky top-20 h-[calc(100vh-6rem)]">
+              <GlobeCanvas />
+              {/* Fade right edge into background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background pointer-events-none" />
+            </div>
+
+            {/* Right — scrolling steps */}
+            <div className="flex flex-col justify-center space-y-32 py-8 lg:py-24">
+
+              {/* Step 1 */}
+              <div className="space-y-4">
+                <span className="text-7xl font-black text-primary/15 select-none leading-none">01</span>
+                <h3 className="text-2xl font-bold">Add a URL</h3>
+                <p className="text-muted-foreground leading-relaxed max-w-md">
+                  Paste any URL into your dashboard. upDawg auto-prepends <code className="text-primary text-sm">https://</code> so you can just type <code className="text-primary text-sm">yoursite.com</code> and we handle the rest.
+                </p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
+                  <span className="size-2 rounded-full bg-primary animate-pulse" />
+                  Instantly added to the monitoring queue
                 </div>
-                <h3 className="font-semibold text-lg">{title}</h3>
-                <p className="text-sm text-muted-foreground max-w-xs">{desc}</p>
               </div>
-            ))}
+
+              {/* Step 2 */}
+              <div className="space-y-4">
+                <span className="text-7xl font-black text-primary/15 select-none leading-none">02</span>
+                <h3 className="text-2xl font-bold">We check it every 60 s</h3>
+                <p className="text-muted-foreground leading-relaxed max-w-md">
+                  Our always-on Rust worker pings your URL from the node you see on the globe. Every check records the HTTP status code and exact response latency in milliseconds.
+                </p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
+                  <span className="size-2 rounded-full bg-green-500 animate-pulse" />
+                  Continuous 24 / 7 monitoring
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="space-y-4">
+                <span className="text-7xl font-black text-primary/15 select-none leading-none">03</span>
+                <h3 className="text-2xl font-bold">Get alerted instantly</h3>
+                <p className="text-muted-foreground leading-relaxed max-w-md">
+                  The moment a site flips DOWN an email fires immediately — you can see the ping rings on the globe go silent. When it recovers you get a second email. React before your users even notice.
+                </p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
+                  <span className="size-2 rounded-full bg-primary animate-pulse" />
+                  Email alert within seconds of downtime
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </section>
@@ -330,6 +374,62 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section id="faq" className="py-24 bg-card/40">
+        <div className="max-w-3xl mx-auto px-6 space-y-10">
+          <div className="text-center space-y-3">
+            <p className="text-sm font-semibold text-primary uppercase tracking-widest">FAQ</p>
+            <h2 className="text-3xl lg:text-4xl font-extrabold">Frequently asked questions</h2>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-2">
+            {[
+              {
+                q: "How often does upDawg check my sites?",
+                a: "Every 60 seconds. The background Rust worker continuously loops through all your monitors with no delay between cycles.",
+              },
+              {
+                q: "What happens when a site goes down?",
+                a: "An alert email is sent immediately to the address you configured in ALERT_EMAIL. When the site recovers, you receive a second recovery email so you know the issue is resolved.",
+              },
+              {
+                q: "How many monitors can I add on the free plan?",
+                a: "Up to 10 URLs on the free tier. The upcoming Pro plan will support unlimited monitors with additional features like multi-region checks and Slack/webhook alerts.",
+              },
+              {
+                q: "Does it check HTTPS and HTTP?",
+                a: "Yes. upDawg monitors any URL that resolves over HTTP or HTTPS. The frontend auto-prepends https:// if you omit the protocol, but you can manually enter http:// URLs too.",
+              },
+              {
+                q: "How is latency measured?",
+                a: "Latency is the total round-trip time from the worker's outbound request to receiving the first byte of the response, measured in milliseconds using Rust's reqwest library.",
+              },
+              {
+                q: "Is my data private?",
+                a: "Yes. All API routes are protected by JWT authentication. Your monitors and alert settings are only accessible with your token.",
+              },
+              {
+                q: "What is the Pro plan?",
+                a: "Pro is coming soon and will include unlimited monitors, 30-second check intervals, SMS/Slack/webhook alerts, 90-day history, multi-region checks, and a public status page.",
+              },
+            ].map(({ q, a }, i) => (
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
+                className="border border-border rounded-xl px-5 bg-card"
+              >
+                <AccordionTrigger className="text-left font-medium hover:no-underline py-4">
+                  {q}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
+                  {a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 

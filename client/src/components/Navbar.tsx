@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
@@ -13,19 +14,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import ThemeToggle from "@/components/ThemeToggle"
-import { Activity, UserCircle, LayoutDashboard, LogOut } from "lucide-react"
+import { UserCircle, LayoutDashboard, LogOut } from "lucide-react"
 import { clearToken } from "@/store/authSlice"
 import { AppDispatch } from "@/store/store"
 
+const DogLogo = dynamic(() => import("@/components/DogLogo"), { ssr: false })
+
 const NAV_LINKS = [
-  { href: "/#features", label: "Features" },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#pricing", label: "Pricing" },
+  { href: "/#features",     label: "Features"      },
+  { href: "/#how-it-works", label: "How it works"  },
+  { href: "/#pricing",      label: "Pricing"       },
+  { href: "/#faq",          label: "FAQ"           },
 ]
 
 export default function Navbar() {
   const pathname = usePathname()
-  const router = useRouter()
+  const router   = useRouter()
   const dispatch = useDispatch<AppDispatch>()
   const isLanding = pathname === "/"
 
@@ -45,10 +49,11 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight">
-          <Activity className="size-5 text-primary" />
-          upDawg
+        <Link href="/" className="flex items-center gap-1.5 font-bold text-lg tracking-tight">
+          <DogLogo size={38} />
+          <span>upDawg</span>
         </Link>
 
         {/* Center nav — landing only */}

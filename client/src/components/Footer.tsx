@@ -1,20 +1,25 @@
+"use client"
+
 import Link from "next/link"
-import { Activity } from "lucide-react"
+import dynamic from "next/dynamic"
+
+const DogLogo = dynamic(() => import("@/components/DogLogo"), { ssr: false })
 
 const LINKS = {
   Product: [
-    { label: "Features", href: "/#features" },
+    { label: "Features",     href: "/#features"     },
     { label: "How it works", href: "/#how-it-works" },
-    { label: "Pricing", href: "/#pricing" },
+    { label: "Pricing",      href: "/#pricing"      },
+    { label: "FAQ",          href: "/#faq"          },
   ],
   Account: [
-    { label: "Sign in", href: "/signin" },
-    { label: "Sign up", href: "/signup" },
+    { label: "Sign in",   href: "/signin"    },
+    { label: "Sign up",   href: "/signup"    },
     { label: "Dashboard", href: "/dashboard" },
   ],
   Legal: [
     { label: "Privacy", href: "#" },
-    { label: "Terms", href: "#" },
+    { label: "Terms",   href: "#" },
   ],
 }
 
@@ -25,9 +30,9 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1 space-y-3">
-            <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-              <Activity className="size-5 text-primary" />
-              upDawg
+            <Link href="/" className="flex items-center gap-1.5 font-bold text-lg">
+              <DogLogo size={34} />
+              <span>upDawg</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               Real-time uptime monitoring with instant alerts. Keep your sites up.
