@@ -12,6 +12,7 @@ diesel::table! {
         id -> Text,
         username -> Text,
         password -> Text,
+        alert_email -> Nullable<Text>,
     }
 }
 

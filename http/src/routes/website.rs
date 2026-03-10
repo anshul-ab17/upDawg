@@ -1,29 +1,37 @@
-use poem::{handler, web::{Data, Json, Path}, http::StatusCode, Response};
+use poem::{handler, web::{Data, Json, Path}, http::StatusCode, Response, Result, Error};
 use crate::DbPool;
 use crate::services::website_service::WebsiteService;
 use crate::middleware::authmiddleware::UserId;
 use crate::types::request::CreateWebsiteInput;
 use crate::types::response::{CreateWebsiteOutput, GetWebsiteOutput, WebsiteWithStatus};
 use db::queries::tick_queries::get_latest_tick;
+use db::queries::website_queries::count_websites_for_user;
+
+const FREE_TIER_LIMIT: i64 = 10;
 
 #[handler]
 pub fn create_website(
     Json(data): Json<CreateWebsiteInput>,
     Data(pool): Data<&DbPool>,
-    UserId(user_id): UserId
-) -> Json<CreateWebsiteOutput> {
+    UserId(user_id): UserId,
+) -> Result<Json<CreateWebsiteOutput>> {
 
-    let mut conn = pool.get().unwrap();
+    let mut conn = pool.get().map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
 
-    let website = WebsiteService::create_website(
-        &mut conn,
-        user_id,
-        data.url
-    ).unwrap();
+    let count = count_websites_for_user(&mut conn, &user_id)
+        .map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
 
-    Json(CreateWebsiteOutput {
-        id: website.id
-    })
+    if count >= FREE_TIER_LIMIT {
+        return Err(Error::from_string(
+            "Free plan limit reached (10 monitors). Upgrade to Pro for unlimited monitors.",
+            StatusCode::PAYMENT_REQUIRED,
+        ));
+    }
+
+    let website = WebsiteService::create_website(&mut conn, user_id, data.url)
+        .map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
+
+    Ok(Json(CreateWebsiteOutput { id: website.id }))
 }
 
 #[handler]

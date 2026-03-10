@@ -6,5 +6,6 @@ use diesel::prelude::*;
 pub struct User {
     pub id: String,
     pub username: String,
-    pub password: String
+    pub password: String,
+    pub alert_email: Option<String>,
 }

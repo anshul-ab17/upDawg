@@ -85,10 +85,15 @@ async fn main() -> anyhow::Result<()> {
 
         if !ok {
             println!("ALERT: {} is DOWN", url);
+            // Use the website owner's alert_email; fall back to cfg.alert_email if unset
+            let recipient = job["alert_email"]
+                .as_str()
+                .unwrap_or(&cfg.alert_email)
+                .to_string();
             if let Err(e) = alerts::send_email(
                 &cfg.email_user,
                 &cfg.email_pass,
-                &cfg.alert_email,
+                &recipient,
                 &url,
             ).await {
                 eprintln!("Failed to send alert email: {}", e);

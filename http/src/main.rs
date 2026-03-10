@@ -15,7 +15,7 @@ use dotenvy::dotenv;
 use std::env;
 
 use crate::routes::{
-    user::{sign_in, sign_up},
+    user::{sign_in, sign_up, get_profile, update_profile},
     website::{create_website, delete_website, get_website, list_websites},
 };
 
@@ -44,12 +44,13 @@ async fn main() -> Result<(), std::io::Error> {
         .expect("Failed to create DB pool");
     let cors = Cors::new()
     .allow_origin("http://localhost:3000")
-    .allow_methods(["GET", "POST", "DELETE"])
+    .allow_methods(["GET", "POST", "DELETE", "PATCH"])
     .allow_headers(["Content-Type", "Authorization"]);
 
     let app = Route::new()
         .at("/user/signup", post(sign_up))
         .at("/user/signin", post(sign_in))
+        .at("/user/profile", get(get_profile).patch(update_profile))
         .at("/website", get(list_websites).post(create_website))
         .at("/website/:id", get(get_website).delete(delete_website))
         .data(pool)

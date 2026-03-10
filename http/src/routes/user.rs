@@ -9,9 +9,10 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::DbPool;
+use crate::middleware::authmiddleware::UserId;
 use crate::services::user_service::UserService;
-use crate::types::request::CreateUserInput;
-use crate::types::response::{CreateUserOutput, SignInOutput};
+use crate::types::request::{CreateUserInput, UpdateProfileInput};
+use crate::types::response::{CreateUserOutput, SignInOutput, UserProfileOutput};
 
 use serde::{Serialize, Deserialize};
 
@@ -80,4 +81,35 @@ pub fn sign_in(
     .map_err(|_| Error::from_status(StatusCode::UNAUTHORIZED))?;
 
     Ok(Json(SignInOutput { jwt: token }))
+}
+
+#[handler]
+pub fn get_profile(
+    Data(pool): Data<&DbPool>,
+    UserId(user_id): UserId,
+) -> Result<Json<UserProfileOutput>, Error> {
+    let mut conn = pool.get().map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
+    let user = UserService::get_profile(&mut conn, &user_id)
+        .map_err(|_| Error::from_status(StatusCode::NOT_FOUND))?;
+    Ok(Json(UserProfileOutput {
+        username:    user.username,
+        alert_email: user.alert_email,
+    }))
+}
+
+#[handler]
+pub fn update_profile(
+    Json(data): Json<UpdateProfileInput>,
+    Data(pool): Data<&DbPool>,
+    UserId(user_id): UserId,
+) -> Result<Json<UserProfileOutput>, Error> {
+    let mut conn = pool.get().map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
+    UserService::update_alert_email(&mut conn, &user_id, data.alert_email)
+        .map_err(|_| Error::from_status(StatusCode::INTERNAL_SERVER_ERROR))?;
+    let user = UserService::get_profile(&mut conn, &user_id)
+        .map_err(|_| Error::from_status(StatusCode::NOT_FOUND))?;
+    Ok(Json(UserProfileOutput {
+        username:    user.username,
+        alert_email: user.alert_email,
+    }))
 }

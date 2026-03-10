@@ -5,7 +5,7 @@ use redis::AsyncCommands;
 use serde_json::json;
 use tokio::time::{sleep, Duration};
 
-use db::queries::website_queries::get_all_websites_global;
+use db::queries::website_queries::get_all_websites_with_alert_email;
 
 type DbPool = Pool<ConnectionManager<Pg>>;
 
@@ -17,11 +17,15 @@ pub async fn enqueue_jobs(
     // Clear existing queue to avoid duplicates
     let _: () = redis.del("monitor_queue").await?;
 
-    let websites = get_all_websites_global(conn)
+    let websites = get_all_websites_with_alert_email(conn)
         .map_err(|e| anyhow::anyhow!("DB error: {}", e))?;
 
     for site in &websites {
-        let job = json!({ "id": site.id, "url": site.url });
+        let job = json!({
+            "id":          site.id,
+            "url":         site.url,
+            "alert_email": site.alert_email,
+        });
         redis.lpush::<&str, String, ()>("monitor_queue", job.to_string()).await?;
     }
 

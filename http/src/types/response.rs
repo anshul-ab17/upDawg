@@ -22,6 +22,12 @@ pub struct GetWebsiteOutput {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct UserProfileOutput {
+    pub username: String,
+    pub alert_email: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct WebsiteWithStatus {
     pub id: String,
     pub url: String,

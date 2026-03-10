@@ -10,3 +10,8 @@ pub struct CreateUserInput {
 pub struct CreateWebsiteInput {
     pub url: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct UpdateProfileInput {
+    pub alert_email: Option<String>,
+}

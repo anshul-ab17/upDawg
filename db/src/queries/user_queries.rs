@@ -16,6 +16,7 @@ pub fn sign_up_user(
         id: id.clone(),
         username,
         password,
+        alert_email: None,
     };
 
     diesel::insert_into(user::table)
@@ -42,4 +43,24 @@ pub fn sign_in_user(
     } else {
         Err(diesel::result::Error::NotFound)
     }
+}
+
+pub fn get_user_profile(
+    conn: &mut PgConnection,
+    ip_user_id: &str,
+) -> Result<User, diesel::result::Error> {
+    use crate::schema::user::dsl::*;
+    user.filter(id.eq(ip_user_id)).first(conn)
+}
+
+pub fn set_alert_email(
+    conn: &mut PgConnection,
+    ip_user_id: &str,
+    email: Option<String>,
+) -> Result<(), diesel::result::Error> {
+    use crate::schema::user::dsl::*;
+    diesel::update(user.filter(id.eq(ip_user_id)))
+        .set(alert_email.eq(email))
+        .execute(conn)?;
+    Ok(())
 }
