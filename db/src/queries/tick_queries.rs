@@ -1,29 +1,27 @@
+use chrono::Utc;
 use diesel::prelude::*;
 use uuid::Uuid;
-use chrono::Utc;
 
-use crate::models::website_tick::WebsiteTick;
+use crate::models::website_tick::{NewWebsiteTick, WebsiteTick};
 use crate::schema::website_tick;
 
 pub fn insert_tick(
     conn: &mut PgConnection,
-    website_id: String,
+    website_id: Uuid,
     response_time: i32,
-) -> Result<(), diesel::result::Error> {
+    status: bool,
+    region: String,
+) -> QueryResult<WebsiteTick> {
 
-    let tick = WebsiteTick {
-
-        id: Uuid::new_v4().to_string(),
+    let new_tick = NewWebsiteTick {
+        website_id: website_id.to_string(),
         response_time,
-        status: "Up".to_string(),
-        region_id: "local".to_string(),
-        website_id,
+        status,
+        region_id: region,
         created_at: Utc::now().naive_utc(),
     };
 
     diesel::insert_into(website_tick::table)
-        .values(&tick)
-        .execute(conn)?;
-
-    Ok(())
+        .values(&new_tick)
+        .get_result(conn)
 }

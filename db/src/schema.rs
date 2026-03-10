@@ -28,10 +28,10 @@ diesel::table! {
     website_tick (id) {
         id -> Text,
         response_time -> Int4,
-        status -> Text,
+        status -> Bool,
         region_id -> Text,
         website_id -> Text,
-        createdat -> Timestamp,
+        created_at -> Timestamp,
     }
 }
 

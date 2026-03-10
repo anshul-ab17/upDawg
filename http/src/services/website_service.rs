@@ -25,4 +25,7 @@ impl WebsiteService {
 
         get_website(conn, id, user_id)
     }
+    pub fn get_all_websites(conn: &mut PgConnection) -> Result<Vec<Website>, diesel::result::Error> {
+        website_queries::get_all_websites(conn)
+    }   
 }

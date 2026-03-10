@@ -1,17 +1,24 @@
-use diesel::prelude::*;
 use chrono::NaiveDateTime;
+use diesel::prelude::*;
 
-#[derive(Queryable, Insertable, Selectable)]
+#[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::schema::website_tick)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct WebsiteTick {
-
     pub id: String,
-    pub response_time: i32,
-    pub status: String,
-    pub region_id: String,
     pub website_id: String,
+    pub response_time: i32,
+    pub status: bool,
+    pub region_id: String,
+    pub created_at: NaiveDateTime,
+}
 
-    #[diesel(column_name = createdat)]
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::website_tick)]
+pub struct NewWebsiteTick {
+    pub website_id: String,
+    pub response_time: i32,
+    pub status: bool,
+    pub region_id: String,
     pub created_at: NaiveDateTime,
 }

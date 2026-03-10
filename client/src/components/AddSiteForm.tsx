@@ -2,47 +2,27 @@
 
 import { useState } from "react"
 import { useDispatch } from "react-redux"
-import { addSite } from "@/store/siteSlice"
-import type { AppDispatch } from "@/store/store"
+import { addWebsite } from "@/store/websiteSlice"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 export default function AddSiteForm() {
-
   const [url, setUrl] = useState("")
-  const dispatch = useDispatch<AppDispatch>()
+  const dispatch = useDispatch()
 
-  const submit = async () => {
-
-    console.log("URL typed:", url)
-
-    if (!url.trim()) {
-      alert("URL required")
-      return
-    }
-
-    await dispatch(addSite(url))
-
+  const addSite = () => {
+    dispatch(addWebsite({ url }))
     setUrl("")
   }
 
   return (
     <div className="flex gap-2">
-
-      <input
-        type="text"
+      <Input
+        placeholder="https://example.com"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://example.com"
-        className="border p-2 text-black"
       />
-
-      <button
-        type="button"
-        onClick={submit}
-        className="bg-blue-500 text-white px-4 py-2"
-      >
-        Add
-      </button>
-
+      <Button onClick={addSite}>Add</Button>
     </div>
   )
 }

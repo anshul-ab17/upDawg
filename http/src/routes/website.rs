@@ -47,3 +47,10 @@ pub fn get_website(
         id: website.id
     })
 }
+
+#[handler]
+pub async fn list_websites(State(pool): State<PgPool>) -> Json<Vec<Website>> {
+    let mut conn = pool.get().unwrap();
+    let websites = website_service::get_all_websites(&mut conn).unwrap();
+    Json(websites)
+}

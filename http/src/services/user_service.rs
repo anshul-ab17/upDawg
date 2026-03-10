@@ -24,4 +24,5 @@ impl UserService {
 
         sign_in_user(conn, username, password)
     }
+
 }

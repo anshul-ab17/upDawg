@@ -42,11 +42,16 @@ pub fn get_website(
         .first(conn)
 }
 
+
 pub fn get_all_websites(
     conn: &mut PgConnection,
+    ip_user_id: String,
 ) -> Result<Vec<Website>, diesel::result::Error> {
 
-    website::table
+    use crate::schema::website::dsl::*;
+
+    website
+        .filter(user_id.eq(ip_user_id))
         .select(Website::as_select())
         .load(conn)
 }
