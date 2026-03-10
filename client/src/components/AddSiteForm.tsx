@@ -2,17 +2,22 @@
 
 import { useState } from "react"
 import { useDispatch } from "react-redux"
-import { addWebsite } from "@/store/websiteSlice"
+import { createWebsite } from "@/store/websiteSlice"
+import { AppDispatch } from "@/store/store"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 export default function AddSiteForm() {
+  const dispatch = useDispatch<AppDispatch>()
   const [url, setUrl] = useState("")
-  const dispatch = useDispatch()
+  const [loading, setLoading] = useState(false)
 
-  const addSite = () => {
-    dispatch(addWebsite({ url }))
+  const handleAdd = async () => {
+    if (!url.trim()) return
+    setLoading(true)
+    await dispatch(createWebsite(url.trim()))
     setUrl("")
+    setLoading(false)
   }
 
   return (
@@ -21,8 +26,11 @@ export default function AddSiteForm() {
         placeholder="https://example.com"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleAdd()}
       />
-      <Button onClick={addSite}>Add</Button>
+      <Button onClick={handleAdd} disabled={loading}>
+        {loading ? "Adding..." : "Add"}
+      </Button>
     </div>
   )
 }

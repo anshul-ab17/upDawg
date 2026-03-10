@@ -1,26 +1,37 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
+import { api } from "@/lib/api"
 
-type Website = {
-  id?: string
+export type Website = {
+  id: string
   url: string
   status?: "UP" | "DOWN"
   latency?: number
 }
 
-const initialState: Website[] = []
+export const fetchWebsites = createAsyncThunk("websites/fetch", async () => {
+  const res = await api.get<Website[]>("/website")
+  return res.data
+})
+
+export const createWebsite = createAsyncThunk("websites/create", async (url: string) => {
+  const res = await api.post<{ id: string }>("/website", { url })
+  return { id: res.data.id, url }
+})
 
 const websiteSlice = createSlice({
   name: "websites",
-  initialState,
+  initialState: [] as Website[],
   reducers: {
-    addWebsite: (state, action: PayloadAction<Website>) => {
-      state.push(action.payload)
-    },
-    setWebsites: (state, action: PayloadAction<Website[]>) => {
-      return action.payload
-    },
+    setWebsites: (_, action: PayloadAction<Website[]>) => action.payload,
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchWebsites.fulfilled, (_, action) => action.payload)
+      .addCase(createWebsite.fulfilled, (state, action) => {
+        state.push(action.payload)
+      })
   },
 })
 
-export const { addWebsite, setWebsites } = websiteSlice.actions
+export const { setWebsites } = websiteSlice.actions
 export default websiteSlice.reducer
